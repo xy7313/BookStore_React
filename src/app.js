@@ -1,36 +1,144 @@
-"use strict";
-import { createStore } from "redux";
+// "use strict";
+import { applyMiddleware, createStore } from "redux";
+import logger from 'redux-logger';
 
-//step 3 define reducers in order to create the store
-//create reducer by passing two arguments, set the initial value for the state
-//set initial value to state in function()
-//the use of reducers are evaluate what to do using switch
-const reducer = function(state = 0, action) {
-  console.log("reducer...state: ", state, "action: ", action);
-  switch (action.type) {
-    case "INCREMENT":
-      return state + action.payload;
-      break;
-    case "decrement":
-      return state - action.payload;
-      break;
-  }
-  return state;
-};
+//{}, find the obj in {} from '', without {} means import the obj which is export in '' and name it as reducers
+import  reducers  from './reducers/index';
+import {addToCart} from './actions/cartActions';
+import {postBook,deleteBook,updateBook} from './actions/bookActions';
 
-//step 1 create the store, pass reducers as parameter
-//see the current of store, use the subscript method, add listener,
-const store = createStore(reducer);
-console.log("store: ", store);
+//store,state
+const middleware = applyMiddleware(logger);
+const store = createStore(reducers, middleware);
 store.subscribe(function() {
-  console.log("current state: " + store.getState());
+  console.log("current state: " , store.getState());
+  // console.log("current state: " , store.getState().price);
+  // when the payload is an array:
+  // console.log("current state: " , store.getState()[1].price);
+
 });
 
-//step 2 create and dispatch actions
-//an action is made by an object that has two properties, type and payload
-//type, key words in redux, payload, call it as you wish
-store.dispatch({ type: "INCREMENT", payload: 1 });
+//action
+store.dispatch(postBook(
+  [
+    {
+      id:1,
+      title:'book title',
+      description:'im a book',
+      price:10000
+    },
+    {
+      id:2,
+      title:'book title2',
+      description:'im another book',
+      price:10002
+    }
+  ]
+));
+store.dispatch(deleteBook({id:1}));
+store.dispatch(updateBook(
+  {
+      id:2,
+      title:'book title updated'
+    }
+));
+store.dispatch(addToCart([{id:1}]));
 
-store.dispatch({ type: "INCREMENT", payload: 1 });
 
-store.dispatch({ type: "decrement", payload: 1 });
+//when all in one file
+//action, we can write a sequence dispatches of actions
+// store.dispatch({
+//   type:"post_book",
+//   payload:[
+//     {
+//       id:1,
+//       title:'book title',
+//       description:'im a book',
+//       price:10000
+//     },
+//     {
+//       id:2,
+//       title:'book title2',
+//       description:'im another book',
+//       price:10002
+//     }
+//   ]
+// });
+
+// store.dispatch({
+//   type:"post_book",
+//   payload:[
+//     {
+//       id:3,
+//       title:'book title3',
+//       description:'im a 3rd book',
+//       price:10003
+//     },
+//   ]
+// });
+// store.dispatch({
+//   type:"delete_book",
+//   payload:{id:1}, 
+// });
+
+// store.dispatch({
+//   type:"update_book",
+//   payload:
+//     {
+//       id:2,
+//       title:'book title updated'
+//     }
+// });
+
+// store.dispatch({
+//   type:"add_to_cart",
+//   payload:[{id:1}]
+// });
+
+
+// //reducer
+// //when payload is an array, state = [], when payload only have one obj, state = {}
+// const reducer = function(state = {books:[]}, action) {
+//   switch (action.type) {
+//     case "post_book":
+//     //we want add third book in, with out this concat, third book overwrite previous payload,
+//     //never use push to concatenate array in redux, use concat method, 
+//     //because, push is a mutable, in redux, should never mutate the state
+//       // let books = state.books.concat(action.payload);
+//       // return {books};
+//       return {books:[...state.books,...action.payload]}
+//       break;
+//     case "delete_book":
+//       const currentBookToDelete = [...state.books];
+//       const indexToDelete = currentBookToDelete.findIndex(
+//         // (book)=>{book.id===action.payload.id;}
+//         function(book){
+//           return book.id===action.payload.id;
+//         }
+//       )
+//             console.log("delete",action.payload.id);
+
+//       return {books:[...currentBookToDelete.slice(0,indexToDelete),
+//         ...currentBookToDelete.slice(indexToDelete+1)]}
+//       break;
+//     case "update_book":
+//       const currentBookToUpdate = [...state.books];
+//       const indexToUpdate = currentBookToUpdate.findIndex(
+//         // (book)=>{book.id===action.payload.id;}
+//         function(book){
+//           return book.id===action.payload.id;
+//         }
+//       );
+//       const bookToUpdate = {
+//         ...currentBookToUpdate[indexToUpdate],
+//         title:action.payload.title
+//       };
+//             console.log("update",bookToUpdate);
+
+//       return {books:[...currentBookToUpdate.slice(0,indexToUpdate),bookToUpdate,
+//         ...currentBookToUpdate.slice(indexToUpdate+1)]}
+//       break;
+
+//   }
+//   return state;
+// };
